@@ -31,6 +31,11 @@ mod server;
 //     return "async_func".to_string();
 // }
 
+#[tauri::command]
+fn continue_execution() {
+    server::send_message("continue_execution");
+}
+
 fn main() {
     // // Retrieve the command line arguments
     // let args: Vec<String> = env::args().collect();
@@ -67,12 +72,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            // normal_func,
-            // params_func,
-            // test_ret_func,
-            // async_func,
-        ])
+        .invoke_handler(tauri::generate_handler![continue_execution])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

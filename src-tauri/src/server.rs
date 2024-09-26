@@ -1,8 +1,14 @@
 // src-tauri/src/server.rs
 use base64;
 use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::sync::{Arc, Mutex};
 use std::{net::TcpListener, thread};
 use tauri::{AppHandle, Manager};
+
+// Define a global writer
+lazy_static::lazy_static! {
+    static ref GLOBAL_WRITER: Arc<Mutex<Option<BufWriter<std::net::TcpStream>>>> = Arc::new(Mutex::new(None));
+}
 
 fn add_tab(app_handle: &AppHandle, identifier: &str, content: &str) {
     app_handle
@@ -22,6 +28,16 @@ fn remove_tab(app_handle: &AppHandle, identifier: &str) {
         .unwrap();
 }
 
+pub fn send_message(message: &str) {
+    let mut writer = GLOBAL_WRITER.lock().unwrap();
+    if let Some(writer) = writer.as_mut() {
+        writeln!(writer, "{}", message).unwrap();
+        writer.flush().unwrap();
+    } else {
+        eprintln!("Writer is not initialized");
+    }
+}
+
 pub fn start_server(app_handle: AppHandle, port: String) {
     thread::spawn(move || {
         let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).expect("Could not bind");
@@ -31,8 +47,11 @@ pub fn start_server(app_handle: AppHandle, port: String) {
                 Ok(stream) => {
                     println!("Connection established: {:?}", stream);
                     let app_handle = app_handle.clone();
+                    let writer = BufWriter::new(stream.try_clone().unwrap());
+                    *GLOBAL_WRITER.lock().unwrap() = Some(writer);
+
                     thread::spawn(move || {
-                        let reader = BufReader::new(stream.try_clone().unwrap());
+                        let reader = BufReader::new(stream);
                         for line in reader.lines() {
                             match line {
                                 Ok(message) => {
