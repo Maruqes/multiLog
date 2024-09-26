@@ -1,41 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
-  </head>
 
-  <body>
-    <div class="container">
-      <h1>Welcome to Tauri!</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Hide scrollbar but allow scrolling */
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
-      </div>
+    .tabs {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
 
-      <p>Click on the Tauri logo to learn more about the framework</p>
-
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p id="greet-msg"></p>
+<body class="dark:bg-black dark:text-white h-screen w-screen flex flex-col">
+  <div class="flex-grow flex flex-col w-full h-full">
+    <!-- Tabs Header -->
+    <div class="tabs flex overflow-x-auto whitespace-nowrap bg-gray-800 dark:bg-gray-900 text-white" id="tabs">
+      <!-- Tabs will be dynamically generated -->
     </div>
-  </body>
+
+    <!-- Terminal Body -->
+    <div class="flex-grow bg-gray-900 dark:bg-black p-4 overflow-auto">
+      <pre class="text-white h-full w-full" id="terminal-content" style="font-size: 16px;">
+        <!-- Terminal content will be dynamically generated -->
+      </pre>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script src="size.js"></script>
+</body>
+
 </html>
