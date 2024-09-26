@@ -14,7 +14,7 @@ mod server;
 // #[tauri::command]
 // fn params_func(name: &str, age: i32) {
 //     println!("Hello, {}! You're {} years old!", name, age);
-// }
+// }\
 
 // #[tauri::command]
 // fn test_ret_func(tpam: bool) -> Result<String, String> {
