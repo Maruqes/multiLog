@@ -25,6 +25,13 @@ function adjustTabFontSize(change)
 // Handle CTRL + and CTRL - for zooming
 document.addEventListener('keydown', (event) =>
 {
+
+    if (event.key === 'Escape')
+    {
+        const searchInput = document.getElementById('search-input');
+        searchInput.style.display = 'none';
+    }
+
     if (event.ctrlKey)
     {
         if (event.key === '+' || event.key === '=')
@@ -37,9 +44,12 @@ document.addEventListener('keydown', (event) =>
             adjustFontSize(-2);
             adjustTabFontSize(-2);
             event.preventDefault();
+        } if (event.key === 'f')
+        {
+            const searchInput = document.getElementById('search-input');
+            searchInput.style.display = 'block';
+            searchInput.focus();
         }
-
-
     }
 
     if (event.altKey)

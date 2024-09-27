@@ -26,7 +26,6 @@ const setActiveTab = (identifier) =>
   renderTabs();
 };
 
-// Function to render tabs dynamically
 const renderTabs = () =>
 {
   const tabsContainer = document.getElementById("tabs");
@@ -45,12 +44,25 @@ const renderTabs = () =>
     tabsContainer.appendChild(tabElement);
   });
 
-
   // Display content of active tab
   const activeTab = tabs.find(tab => tab.identifier === activeTabIdentifier);
-  terminalContent.innerHTML = activeTab.content.replace(/\|ERR\|.*?\|ERR\|/g, match => `<span style="background-color: red; font-weight:bolder;">${match.replace(/\|ERR\|/g, '')}</span>`);
 
+  // Sanitize the content and remove inline styles
+  let sanitizedContent = DOMPurify.sanitize(activeTab.content, {
+    ALLOWED_ATTR: ['class', 'id'], // Allow only 'class' and 'id' attributes
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'p', 'span'], // Allow basic formatting tags
+    ALLOW_UNKNOWN_PROTOCOLS: false
+  });
+
+  // Apply custom formatting after sanitizing the content
+  let final_content = sanitizedContent.replace(/\|ERR\|.*?\|ERR\|/g, match => `<span style="background-color: red; font-weight: bolder;">${match.replace(/\|ERR\|/g, '')}</span>`);
+  final_content = final_content.replace(/\|INFO\|.*?\|INFO\|/g, match => `<span style="color: rgb(137, 207, 240); font-weight: bolder;">${match.replace(/\|INFO\|/g, '')}</span>`);
+  final_content = final_content.replace(/\|WARN\|.*?\|WARN\|/g, match => `<span style="color: rgb(255, 191, 0); font-weight: bolder;">${match.replace(/\|WARN\|/g, '')}</span>`);
+
+  terminalContent.innerHTML = final_content;
 };
+
+
 
 function checkIfTabExists(identifier)
 {
@@ -110,7 +122,7 @@ function add_content(identifier, content)
 {
   if (!checkIfTabExists(identifier))
   {
-    console.error("Tab " + identifier + " does not exists");
+    console.error("Tab " + identifier + " does not exist");
     return;
   }
 
@@ -121,10 +133,22 @@ function add_content(identifier, content)
     const padZero = (num) => num.toString().padStart(2, '0');
     const cur_time = `${padZero(cur_date.getHours())}:${padZero(cur_date.getMinutes())}:${padZero(cur_date.getSeconds())}`;
     content = `${cur_time} | ${content}`;
-    tab.content += content;
+
+    // Sanitize the content and remove any inline styles using DOMPurify
+    let sanitizedContent = DOMPurify.sanitize(content, {
+      ALLOWED_ATTR: ['class', 'id'], // Allow only 'class' and 'id' attributes
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'p', 'span'], // Allow basic formatting tags
+      ALLOW_UNKNOWN_PROTOCOLS: false
+    });
+
+    // Append the sanitized content to the tab's existing content
+    tab.content += sanitizedContent;
+
+    // Re-render tabs with the sanitized content
     renderTabs();
   }
 }
+
 
 
 
@@ -155,7 +179,113 @@ document.addEventListener("DOMContentLoaded", function ()
   listenFunctions();
   renderTabs();
   invoke("continue_execution");
+  add_content("tab-1", "|ERR|err|ERR|")
 });
+
+
+
+let currentSearchIndex = -1;
+let searchMatches = [];
+
+function searchKeyword(keyword)
+{
+  const terminalContent = document.getElementById("terminal-content");
+
+  // Get the active tab content and apply custom formatting first
+  const activeTab = tabs.find(tab => tab.identifier === activeTabIdentifier);
+  let content = activeTab.content;
+
+  // Apply original error/info/warn formatting
+  let formattedContent = content.replace(/\|ERR\|.*?\|ERR\|/g, match => `<span style="background-color: red; font-weight: bolder;">${match.replace(/\|ERR\|/g, '')}</span>`);
+  formattedContent = formattedContent.replace(/\|INFO\|.*?\|INFO\|/g, match => `<span style="color: rgb(137, 207, 240); font-weight: bolder;">${match.replace(/\|INFO\|/g, '')}</span>`);
+  formattedContent = formattedContent.replace(/\|WARN\|.*?\|WARN\|/g, match => `<span style="color: rgb(255, 191, 0); font-weight: bolder;">${match.replace(/\|WARN\|/g, '')}</span>`);
+
+  // If no keyword is provided, just display the formatted content
+  if (!keyword)
+  {
+    terminalContent.innerHTML = formattedContent;
+    return;
+  }
+
+  // **Get visible text** by stripping HTML tags for the search
+  const plainText = terminalContent.textContent || terminalContent.innerText;
+
+  // Create a regex to find all matches of the keyword in the visible text
+  const regex = new RegExp(keyword, 'gi');
+  searchMatches = [];
+  let match;
+
+  // Search the plain text (without HTML) for keyword matches
+  let matchIndex = 0;
+  while ((match = regex.exec(plainText)) !== null)
+  {
+    searchMatches.push({ index: match.index, length: match[0].length, matchText: match[0] });
+    matchIndex++;
+  }
+
+  // **Rebuild the final content with the original formatting**
+  let finalContent = formattedContent;
+
+  // Create a helper function to avoid modifying content within HTML tags
+  const sanitizeContent = (content) =>
+  {
+    let index = 0;
+    finalContent = finalContent.replace(/>([^<]+)</g, (match, p1) =>
+    {
+      // Only highlight the actual visible content between tags, not inside tags
+      return `>${p1.replace(new RegExp(keyword, 'gi'), `<mark>${keyword}</mark>`)}<`;
+    });
+  };
+
+  sanitizeContent(finalContent);
+
+  // Set the content with both highlighting and original custom formatting
+  terminalContent.innerHTML = finalContent;
+
+  // Reset the search index and move to the first match
+  currentSearchIndex = -1;
+  goToNextMatch();
+}
+
+
+function goToNextMatch()
+{
+  if (searchMatches.length === 0)
+  {
+    return;
+  }
+
+  currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length;
+
+  const terminalContent = document.getElementById("terminal-content");
+
+  // Scroll to the highlighted match
+  const contentElement = terminalContent.querySelectorAll("mark")[currentSearchIndex];
+  if (contentElement)
+  {
+    contentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+// Event listener for search input
+document.getElementById('search-input').addEventListener('keyup', (event) =>
+{
+  const keyword = event.target.value;
+
+  if (event.key === 'Enter')
+  {
+    goToNextMatch();
+  } else
+  {
+    searchKeyword(keyword);
+  }
+});
+
+
+
+const searchInput = document.getElementById('search-input');
+searchInput.style.display = 'none';
+
 
 // invoke("normal_func");
 
