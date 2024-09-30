@@ -2,42 +2,42 @@
 <html lang="en">
 
 <head>
+  <!-- Meta Tags -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Terminal</title>
+  <title>Logs Interface</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Hide scrollbar but allow scrolling */
-    .tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .tabs {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
 </head>
 
-<body class="dark:bg-black dark:text-white h-screen w-screen flex flex-col">
-  <div class="flex-grow flex flex-col w-full h-full">
-    <!-- Tabs Header -->
-    <div class="tabs flex overflow-x-auto whitespace-nowrap bg-gray-800 dark:bg-gray-900 text-white" id="tabs">
-      <!-- Tabs will be dynamically generated -->
-    </div>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white h-screen w-screen flex flex-col">
 
-    <!-- Terminal Body -->
-    <div class="flex-grow bg-gray-900 dark:bg-black p-4 overflow-auto">
-      <pre class="text-white h-full w-full" id="terminal-content" style="font-size: 16px;">
-        <!-- Terminal content will be dynamically generated -->
-      </pre>
-    </div>
-
-    <div class="flex items-center p-4 bg-gray-800 dark:bg-gray-900">
-      <input id="search-input" class="w-full p-2 text-black dark:text-white bg-gray-300 dark:bg-gray-700 rounded" type="text" placeholder="Search keyword...">
-    </div>
+  <!-- Tabs Header -->
+  <div class="tabs flex bg-gray-800 text-white p-2 flex-shrink-0" id="tabs">
+    <!-- Tabs will be dynamically generated -->
   </div>
 
+  <!-- Terminal Content Area -->
+  <div class="flex-grow flex overflow-hidden">
+    <pre class="text-white flex-grow font-mono rounded-lg shadow-inner bg-black bg-opacity-75 p-4 overflow-auto"
+      id="terminal-content" style="font-size: 16px;">
+        <!-- Terminal content will be dynamically generated -->
+      </pre>
+  </div>
+
+
+  <!-- Search Input -->
+  <div class="flex items-center p-4 bg-gray-800 flex-shrink-0" id="search-container">
+    <input id="search-input"
+      class="w-full p-2 text-white bg-gray-700 rounded-lg placeholder-gray-400 focus:outline-none hidden" type="text"
+      placeholder="Search keyword...">
+  </div>
+
+  <!-- Scripts -->
   <script src="main.js"></script>
   <script src="size.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.8/purify.min.js"></script>

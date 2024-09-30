@@ -1,0 +1,45 @@
+/* Base Styles */
+body {
+  font-family: 'Fira Code', monospace;
+}
+
+/* Make the tabs sticky at the top */
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Make the search input sticky at the bottom */
+#search-container {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Ensure the terminal content area allows scrolling */
+.flex-grow {
+  overflow: auto;
+}
+
+/* Terminal Content Styling */
+#terminal-content {
+  padding: 16px;
+  line-height: 1.6;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Search Input */
+#search-input {
+  display: none;
+  /* Initially hidden */
+  transition: opacity 0.3s;
+}
+
+/* When search input is visible */
+#search-input.show {
+  display: block;
+}
+
+/* Other existing styles remain unchanged */
